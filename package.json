@@ -1,0 +1,50 @@
+{
+  "name": "llm-baseurl-detector",
+  "version": "0.1.0",
+  "description": "Detect which LLM API dialects (OpenAI chat/responses, Anthropic messages, Gemini, TypeSafe System One) a given base URL supports, by probing candidate endpoints.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "llm-baseurl-detect": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "pretest": "npm run build",
+    "test": "node --test test/"
+  },
+  "keywords": [
+    "llm",
+    "openai-compatible",
+    "anthropic",
+    "base-url",
+    "api-detection",
+    "provider"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "typescript": "^5.9.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/llaa33219/llm-baseurl-detector.git"
+  },
+  "homepage": "https://github.com/llaa33219/llm-baseurl-detector#readme",
+  "bugs": {
+    "url": "https://github.com/llaa33219/llm-baseurl-detector/issues"
+  }
+}
