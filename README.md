@@ -166,4 +166,4 @@ Options: `--api-key`, `--model`, `--timeout <ms>`, `--dialects a,b,c`, `--models
 
 ## License
 
-MIT
+Apache-2.0
