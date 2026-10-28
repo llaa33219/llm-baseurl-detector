@@ -460,3 +460,31 @@ test('fingerprint: same-status request_id-only diff does NOT upgrade', async () 
     srv.close();
   }
 });
+
+test('sdkBaseUrls strips dialect endpoint suffix correctly', async () => {
+  const srv = http.createServer((req, res) => {
+    const path = new URL(req.url, 'http://x').pathname;
+    if (path === '/anthropic/v1/messages') {
+      res.writeHead(401, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ type: 'error', error: { type: 'authentication_error', message: 'no key' } }));
+      return;
+    }
+    if (path === '/v1/chat/completions') {
+      res.writeHead(401, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ error: { message: 'no key' } }));
+      return;
+    }
+    res.writeHead(404); res.end('{}');
+  });
+  await new Promise((r) => srv.listen(0, '127.0.0.1', r));
+  try {
+    const origin = `http://127.0.0.1:${srv.address().port}`;
+    const r = await detect(`${origin}/v1`, { dialects: ['openai-chat', 'anthropic-messages'] });
+    assert.equal(r.endpoints['openai-chat'], `${origin}/v1/chat/completions`);
+    assert.equal(r.sdkBaseUrls['openai-chat'], `${origin}/v1`);
+    assert.equal(r.endpoints['anthropic-messages'], `${origin}/anthropic/v1/messages`);
+    assert.equal(r.sdkBaseUrls['anthropic-messages'], `${origin}/anthropic`);
+  } finally {
+    srv.close();
+  }
+});

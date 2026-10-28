@@ -30,8 +30,17 @@ export interface DetectionResult {
   /** Normalized input base URL (trailing slash trimmed). */
   baseUrl: string;
   probes: DialectProbe[];
-  /** Dialects with status 'supported' or 'likely', with the best-guess full endpoint URL. */
+  /**
+   * Dialects with status 'supported' or 'likely', with the best-guess full
+   * endpoint URL — POST directly to this (raw request form).
+   */
   endpoints: Partial<Record<DialectId, string>>;
+  /**
+   * Same dialects, but as the **SDK base URL** form: what you paste into an
+   * SDK's baseURL field (the SDK appends its own path). Derived by stripping
+   * the dialect's endpoint suffix from `endpoints`.
+   */
+  sdkBaseUrls: Partial<Record<DialectId, string>>;
   /** GET {base}/models result, present only when opts.probeModels was on. */
   modelsList?: {
     reachable: boolean;

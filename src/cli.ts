@@ -83,8 +83,13 @@ if (asJson) {
     if (m.sampleModels?.length) console.log(`  sample: ${m.sampleModels.join(', ')}`);
   }
   const found = Object.entries(result.endpoints);
-  console.log('\nDetected endpoints:');
+  console.log('\nDetected endpoints (raw POST URLs):');
   if (found.length === 0) console.log('  (none)');
   for (const [d, url] of found) console.log(`  ${d}: ${url}`);
+  const bases = Object.entries(result.sdkBaseUrls);
+  if (bases.length > 0) {
+    console.log('\nSDK base URLs (paste into SDK baseURL field):');
+    for (const [d, url] of bases) console.log(`  ${d}: ${url}`);
+  }
   console.log(`\n(${result.durationMs}ms)`);
 }

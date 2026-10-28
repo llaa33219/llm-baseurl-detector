@@ -324,6 +324,29 @@ const STATUS_RANK: Record<ProbeStatus, number> = {
   'not-found': 0,
 };
 
+/**
+ * Convert a full endpoint URL into the SDK base-URL form for its dialect.
+ * Strips the dialect's known endpoint suffix so the SDK can re-append it.
+ */
+function toSdkBase(dialect: DialectId, endpointUrl: string): string {
+  const suffixes: Record<DialectId, RegExp[]> = {
+    'openai-chat': [/\/chat\/completions$/i, /\/openai\/v1$/i, /\/openai$/i],
+    'openai-responses': [/\/responses$/i],
+    'anthropic-messages': [/\/v1\/messages$/i, /\/messages$/i],
+    'gemini-generate': [/\/models\/[^/]+:generateContent$/i],
+    'typesafe-systemone': [/\/v1\/systemone$/i, /\/systemone$/i],
+  };
+  let out = endpointUrl;
+  for (const re of suffixes[dialect]) {
+    const stripped = out.replace(re, '');
+    if (stripped !== out) {
+      out = stripped;
+      break; // apply only the first matching suffix
+    }
+  }
+  return out.replace(/\/+$/, '');
+}
+
 /** Run probes with bounded concurrency, early-exiting a dialect once 'supported'. */
 async function probeDialect(
   inputBase: string,
@@ -537,10 +560,12 @@ export async function detect(baseUrl: string, options: DetectOptions = {}): Prom
   await Promise.all(Array.from({ length: Math.min(pool, dialects.length) }, worker));
 
   const endpoints: DetectionResult['endpoints'] = {};
+  const sdkBaseUrls: DetectionResult['sdkBaseUrls'] = {};
   for (const p of probes) {
     if (p.dialect === 'models-list') continue;
     if (p.status === 'supported' || p.status === 'likely') {
       endpoints[p.dialect] = p.probedUrl;
+      sdkBaseUrls[p.dialect] = toSdkBase(p.dialect, p.probedUrl);
     }
   }
 
@@ -552,6 +577,7 @@ export async function detect(baseUrl: string, options: DetectOptions = {}): Prom
     baseUrl: normalized,
     probes,
     endpoints,
+    sdkBaseUrls,
     modelsList,
     durationMs: Date.now() - started,
   };
