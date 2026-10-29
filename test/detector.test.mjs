@@ -488,3 +488,54 @@ test('sdkBaseUrls strips dialect endpoint suffix correctly', async () => {
     srv.close();
   }
 });
+
+test('finds an application-scoped /apps/anthropic mount from the origin', async () => {
+  const srv = http.createServer((req, res) => {
+    const path = new URL(req.url, 'http://x').pathname;
+    if (path === '/apps/anthropic/v1/messages' && req.method === 'POST') {
+      res.writeHead(401, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({
+        type: 'error',
+        error: { type: 'authentication_error', message: 'no key' },
+      }));
+      return;
+    }
+    res.writeHead(404, { 'content-type': 'application/json' });
+    res.end('{"error":"not found"}');
+  });
+  await new Promise((r) => srv.listen(0, '127.0.0.1', r));
+  try {
+    const origin = `http://127.0.0.1:${srv.address().port}`;
+    const r = await detect(origin, { dialects: ['anthropic-messages'] });
+    assert.equal(r.probes[0].status, 'supported');
+    assert.equal(r.endpoints['anthropic-messages'], `${origin}/apps/anthropic/v1/messages`);
+    assert.equal(r.sdkBaseUrls['anthropic-messages'], `${origin}/apps/anthropic`);
+  } finally {
+    srv.close();
+  }
+});
+
+test('accepts /apps/anthropic directly as an Anthropic SDK base URL', async () => {
+  const srv = http.createServer((req, res) => {
+    const path = new URL(req.url, 'http://x').pathname;
+    if (path === '/apps/anthropic/v1/messages' && req.method === 'POST') {
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({
+        id: 'msg_mock', type: 'message', role: 'assistant', content: [],
+      }));
+      return;
+    }
+    res.writeHead(404, { 'content-type': 'application/json' });
+    res.end('{}');
+  });
+  await new Promise((r) => srv.listen(0, '127.0.0.1', r));
+  try {
+    const base = `http://127.0.0.1:${srv.address().port}/apps/anthropic`;
+    const r = await detect(base, { dialects: ['anthropic-messages'] });
+    assert.equal(r.probes[0].status, 'supported');
+    assert.equal(r.probes[0].probedUrl, `${base}/v1/messages`);
+    assert.equal(r.sdkBaseUrls['anthropic-messages'], base);
+  } finally {
+    srv.close();
+  }
+});

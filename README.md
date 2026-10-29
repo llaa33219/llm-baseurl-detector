@@ -151,7 +151,7 @@ Options: `--api-key`, `--model`, `--timeout <ms>`, `--dialects a,b,c`, `--models
 
 1. Normalizes the input (trailing slashes trimmed).
 2. Builds candidate URLs per dialect from the input base: the primary pattern plus
-   alternate mount points (`{origin}`, `/anthropic`, `/api/v1`, `/openai`, `/v2`...).
+   alternate mount points (`{origin}`, `/anthropic`, `/apps/anthropic`, `/api/v1`, `/openai`, `/v2`...).
    No provider database is consulted — candidates come from path patterns only.
 3. For each dialect, builds candidate URLs: DB-seeded endpoints for that host (only
    ones rooted at the input base), then the primary pattern candidate per dialect.

@@ -1,6 +1,6 @@
 {
   "name": "llm-baseurl-detector",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Detect which LLM API dialects (OpenAI chat/responses, Anthropic messages, Gemini, TypeSafe System One) a given base URL supports, by probing candidate endpoints.",
   "type": "module",
   "main": "./dist/index.js",

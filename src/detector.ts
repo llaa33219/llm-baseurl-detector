@@ -63,6 +63,7 @@ function candidateUrls(
       push(`${base}/v1/messages`); // anthropic-style base without /v1
       push(`${base}/messages`); // base already includes /v1
       push(`${base}/anthropic/v1/messages`); // providers that mount anthropic under /anthropic
+      push(`${base}/apps/anthropic/v1/messages`); // application-scoped anthropic mounts
       break;
     case 'gemini-generate':
       push(`${base}/models/${model}:generateContent`);
